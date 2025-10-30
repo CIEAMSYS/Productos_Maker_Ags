@@ -1036,4 +1036,126 @@
                 });
                 
                 // Agregar event listeners a los botones de eliminar
-                document.querySelectorAll('.cart-item-
+                document.querySelectorAll('.cart-item-remove').forEach(button => {
+                    button.addEventListener('click', removeFromCart);
+                });
+            }
+            
+            cartCountElement.textContent = cartCount;
+            cartTotalElement.textContent = `Total: $${cartTotal}.00`;
+        }
+
+        // Eliminar producto del carrito
+        function removeFromCart(e) {
+            const index = parseInt(e.target.getAttribute('data-index'));
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        // Abrir/cerrar carrito
+        cartIcon.addEventListener('click', () => {
+            cartContainer.classList.add('open');
+        });
+
+        closeCart.addEventListener('click', () => {
+            cartContainer.classList.remove('open');
+        });
+
+        // Mostrar modal de contacto al completar pedido
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert('Tu carrito está vacío');
+                return;
+            }
+            
+            contactModal.style.display = 'flex';
+        });
+
+        // Cerrar modal de contacto
+        cancelOrderBtn.addEventListener('click', () => {
+            contactModal.style.display = 'none';
+        });
+
+        // Enviar formulario de contacto
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('customer-name').value;
+            const email = document.getElementById('customer-email').value;
+            const phone = document.getElementById('customer-phone').value;
+            const message = document.getElementById('customer-message').value;
+            
+            // Crear resumen del pedido
+            let orderSummary = `Nuevo pedido de ${name}\n\n`;
+            orderSummary += `Correo: ${email}\n`;
+            orderSummary += `Teléfono: ${phone}\n\n`;
+            orderSummary += `Productos:\n`;
+            
+            cart.forEach(item => {
+                orderSummary += `- ${item.name} (Cantidad: ${item.quantity})\n`;
+                if (item.color) orderSummary += `  Color: ${item.color}\n`;
+                if (item.size) orderSummary += `  Talla: ${item.size}\n`;
+                if (item.customization) orderSummary += `  Personalización: ${item.customization}\n`;
+                orderSummary += `  Precio: $${item.price}\n\n`;
+            });
+            
+            orderSummary += `Total: $${cartTotal}.00\n\n`;
+            orderSummary += `Mensaje adicional: ${message}`;
+            
+            // Enviar por correo (simulado)
+            alert(`Pedido enviado a productosmaker@gmail.com\n\n${orderSummary}`);
+            
+            // Limpiar carrito y formulario
+            cart = [];
+            updateCart();
+            contactForm.reset();
+            contactModal.style.display = 'none';
+            cartContainer.classList.remove('open');
+        });
+
+        // Filtros de productos
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remover clase active de todos los botones
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Agregar clase active al botón clickeado
+                this.classList.add('active');
+                
+                // Filtrar productos
+                const filter = this.getAttribute('data-filter');
+                loadProducts(filter);
+            });
+        });
+
+        // Filtros por categorías
+        categoryCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                
+                // Actualizar botones de filtro
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.getAttribute('data-filter') === category) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                // Si se hace clic en "todos"
+                if (category === 'todos') {
+                    filterButtons[0].classList.add('active');
+                }
+                
+                // Filtrar productos
+                loadProducts(category);
+                
+                // Desplazarse a la sección de productos
+                document.getElementById('productos').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Inicializar la página
+        loadProducts();
+    </script>
+</body>
+</html>
